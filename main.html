@@ -1,0 +1,596 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & Description -->
+    <meta name="description" content="Metrom - Cairo Metro Route Planner. Plan your journey, find the best routes, check fares, and navigate Cairo's metro network with real-time assistance.">
+    <meta name="keywords" content="Cairo Metro Route Planner, Metro Navigation, Cairo Subway Routes, Public Transport Planner, Station Finder, Cairo Transportation">
+    <meta name="author" content="Mohamed Salem">
+    <meta name="designer" content="Mivex - Mohamed Salem">
+    <meta name="language" content="English">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="Revisit-After" content="7 days">
+    <meta name="distribution" content="Global">
+    
+    <!-- Theme & Browser Config -->
+    <meta name="theme-color" content="#1e483f">
+    <meta name="msapplication-TileColor" content="#1e483f">
+    
+    <!-- Open Graph (Social Sharing) -->
+    <meta property="og:title" content="Mivex | Cairo Metro Route Planner">
+    <meta property="og:description" content="Interactive Cairo metro route planner with real-time navigation, station information, and fare calculations for all Cairo Metro lines.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mohamedsalem80.github.io/metrom/main.html">
+    <meta property="og:site_name" content="Mivex">
+    <meta property="og:image" content="https://mohamedsalem80.github.io/metrom/favicon/social-preview.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="ar_EG">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mivex | Cairo Metro Route Planner">
+    <meta name="twitter:description" content="Plan your Cairo metro journey with real-time route guidance and station information.">
+    <meta name="twitter:image" content="https://mohamedsalem80.github.io/metrom/favicon/social-preview.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mohamedsalem80.github.io/metrom/main.html">
+    
+    <!-- Favicon Set -->
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <title>Mivex | Cairo Metro Route Planner</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Cairo Metro Route Planner",
+      "description": "Interactive Cairo Metro route planner with station search, navigation support, and fare estimation.",
+      "url": "https://mohamedsalem80.github.io/metrom/main.html",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Any",
+      "author": {
+        "@type": "Person",
+        "name": "Mohamed Salem"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Mivex"
+      }
+    }
+    </script>
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/metro.min.css">
+    <style>
+        .travel-hud {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.5rem 0 1rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 207, 134, 0.28);
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(12, 40, 37, 0.92), rgba(18, 64, 55, 0.92));
+        }
+
+        .travel-hud .travel-status {
+            flex: 1 1 300px;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #d6ece7;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .travel-speed-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 134px;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 207, 134, 0.4);
+            background: rgba(255, 207, 134, 0.16);
+            color: #ffcf86;
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .travel-hud {
+                padding: 0.7rem 0.8rem;
+            }
+            .travel-hud .travel-status {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="index.html" title="Cairo Metro Navigator Home">
+                    <img src="favicon/metrom-23.png" alt="Cairo Metro Navigator Logo" width="120" height="60" loading="lazy" decoding="async">
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#metroMap">Map</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <div class="page-title">
+            <h1>Plan Your Cairo Metro Journey</h1>
+            <p>Select your starting point and destination to find the best route</p>
+        </div>
+
+        <div class="tabs-shell">
+            <div class="tabs-nav" role="tablist" aria-label="Metro tools sections">
+                <button type="button" class="tab-btn active" data-tab-target="tab-planner" id="tab-btn-planner" role="tab" aria-controls="tab-planner" aria-selected="true">Planner</button>
+                <button type="button" class="tab-btn" data-tab-target="tab-coordinates" id="tab-btn-coordinates" role="tab" aria-controls="tab-coordinates" aria-selected="false" tabindex="-1">Coordinates</button>
+                <button type="button" class="tab-btn" data-tab-target="tab-info" id="tab-btn-info" role="tab" aria-controls="tab-info" aria-selected="false" tabindex="-1">Info</button>
+            </div>
+
+            <section id="tab-planner" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-planner">
+                <div class="planner-container">
+                    <div class="planner-section" id="planner">
+                        <h2>From (Starting Point)</h2>
+                        <label>
+                            <p>Select Line:</p>
+                            <div class="label-row">
+                                <select name="line" id="sline" autocomplete="off">
+                                    <option value="">Choose a line...</option>
+                                    <option value="one">Line 1 (Helwan - El Marg)</option>
+                                    <option value="two">Line 2 (El Monib - Shubra Al Khaimah)</option>
+                                    <option value="three">Line 3 (Adly Mansour - Ring Road)</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <p>Select Station:</p>
+                            <select name="pickup" class="pickupl1" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="Helwan">Helwan</option>
+                                <option value="Ain Helwan">Ain Helwan</option>
+                                <option value="Helwan University">Helwan University</option>
+                                <option value="Wadi Hof">Wadi Hof</option>
+                                <option value="Hadayeq Helwan">Hadayeq Helwan</option>
+                                <option value="Elmasraa">Elmasraa</option>
+                                <option value="Tura El-Asmant">Tura El-Asmant</option>
+                                <option value="Kozzika">Kozzika</option>
+                                <option value="Tura El-Balad">Tura El-Balad</option>
+                                <option value="Sakanat El-Maadi">Sakanat El-Maadi</option>
+                                <option value="Maadi">Maadi</option>
+                                <option value="Hadayeq El-Maadi">Hadayeq El-Maadi</option>
+                                <option value="Dar El-Salam">Dar El-Salam</option>
+                                <option value="El-Zahraa">El-Zahraa</option>
+                                <option value="Mar Girgis">Mar Girgis</option>
+                                <option value="El-Malek El-Saleh">El-Malek El-Saleh</option>
+                                <option value="Al-Sayeda Zeinab">Al-Sayeda Zeinab</option>
+                                <option value="Saad Zaghloul">Saad Zaghloul</option>
+                                <option value="Sadat">Sadat</option>
+                                <option value="Nasser">Nasser</option>
+                                <option value="Urabi">Urabi</option>
+                                <option value="Al Shohadaa">Al Shohadaa</option>
+                                <option value="Ghamra">Ghamra</option>
+                                <option value="El-Demerdash">El-Demerdash</option>
+                                <option value="Manshiet El-Sadr">Manshiet El-Sadr</option>
+                                <option value="Kobri El-Qobba">Kobri El-Qobba</option>
+                                <option value="Hammamat El-Qobba">Hammamat El-Qobba</option>
+                                <option value="Saray El-Qobba">Saray El-Qobba</option>
+                                <option value="Hadayeq El-Zaitoun">Hadayeq El-Zaitoun</option>
+                                <option value="Helmeyet El-Zaitoun">Helmeyet El-Zaitoun</option>
+                                <option value="El-Matareyya">El-Matareyya</option>
+                                <option value="Ain Shams">Ain Shams</option>
+                                <option value="Ezbet El-Nakhl">Ezbet El-Nakhl</option>
+                                <option value="El-Marg">El-Marg</option>
+                                <option value="New El-Marg">New El-Marg</option>
+                            </select>
+                            <select name="pickup" class="pickupl2" style="display:none;" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="El Monib">El Monib</option>
+                                <option value="Sakiat Mekky">Sakiat Mekky</option>
+                                <option value="Omm El-Masryeen">Omm El-Masryeen</option>
+                                <option value="Giza">Giza</option>
+                                <option value="Faisal">Faisal</option>
+                                <option value="Cairo University">Cairo University</option>
+                                <option value="Bohooth">Bohooth</option>
+                                <option value="Dokki">Dokki</option>
+                                <option value="Opera">Opera</option>
+                                <option value="Sadat">Sadat</option>
+                                <option value="Mohamed Naguib">Mohamed Naguib</option>
+                                <option value="Ataba">Ataba</option>
+                                <option value="Al Shohadaa">Al Shohadaa</option>
+                                <option value="Masarra">Masarra</option>
+                                <option value="Rod El-Farag">Rod El-Farag</option>
+                                <option value="St. Teresa">St. Teresa</option>
+                                <option value="Khalafawy">Khalafawy</option>
+                                <option value="Mezallat">Mezallat</option>
+                                <option value="Koliet El-Zeraa">Koliet El-Zeraa</option>
+                                <option value="Shubra Al Khaimah">Shubra Al Khaimah</option>
+                            </select>
+                            <select name="pickup" class="pickupl3" style="display:none;" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="Adly Mansour">Adly Mansour</option>
+                                <option value="Heykestep">Heykestep</option>
+                                <option value="Omar Ibn Al Khattab">Omar Ibn Al Khattab</option>
+                                <option value="Qebaa">Qebaa</option>
+                                <option value="Hesham Barakat">Hesham Barakat</option>
+                                <option value="El Nozha">El Nozha</option>
+                                <option value="Nadi El Shams">Nadi El Shams</option>
+                                <option value="Alf Maskan">Alf Maskan</option>
+                                <option value="Heliopolis">Heliopolis</option>
+                                <option value="Haroun">Haroun</option>
+                                <option value="Al Ahram">Al Ahram</option>
+                                <option value="Koleyet El Banat">Koleyet El Banat</option>
+                                <option value="Cairo Stadium">Cairo Stadium</option>
+                                <option value="Fair Zone">Fair Zone</option>
+                                <option value="Abbassiya">Abbassiya</option>
+                                <option value="Abdou Pasha">Abdou Pasha</option>
+                                <option value="El Geish">El Geish</option>
+                                <option value="Bab El Shaaria">Bab El Shaaria</option>
+                                <option value="Ataba">Ataba</option>
+                                <option value="Nasser">Nasser</option>
+                                <option value="Maspero">Maspero</option>
+                                <option value="Safaa Hegazy">Safaa Hegazy</option>
+                                <option value="Kit Kat">Kit Kat</option>
+                                <option value="Sudan St.">Sudan St.</option>
+                                <option value="Imbaba">Imbaba</option>
+                                <option value="El Bohy">El Bohy</option>
+                                <option value="El-Qawmia">El-Qawmia</option>
+                                <option value="Ring Rd.">Ring Rd.</option>
+                                <option value="Rod El Farag Corridor">Rod El Farag Corridor</option>
+                                <option value="Tawfikia">Tawfikia</option>
+                                <option value="Wadi El Nile">Wadi El Nile</option>
+                                <option value="Gamat El Dowal">Gamat El Dowal</option>
+                                <option value="Boulak El Dakrour">Boulak El Dakrour</option>
+                                <option value="Cairo University">Cairo University</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="planner-section">
+                        <h2>To (Destination)</h2>
+                        <label>
+                            <p>Select Line:</p>
+                            <div class="label-row">
+                                <select name="line" id="eline" autocomplete="off">
+                                    <option value="">Choose a line...</option>
+                                    <option value="one">Line 1 (Helwan - El Marg)</option>
+                                    <option value="two">Line 2 (El Monib - Shubra Al Khaimah)</option>
+                                    <option value="three">Line 3 (Adly Mansour - Ring Road)</option>
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            <p>Select Station:</p>
+                            <select name="dropoff" class="dropoff1" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="Helwan">Helwan</option>
+                                <option value="Ain Helwan">Ain Helwan</option>
+                                <option value="Helwan University">Helwan University</option>
+                                <option value="Wadi Hof">Wadi Hof</option>
+                                <option value="Hadayeq Helwan">Hadayeq Helwan</option>
+                                <option value="Elmasraa">Elmasraa</option>
+                                <option value="Tura El-Asmant">Tura El-Asmant</option>
+                                <option value="Kozzika">Kozzika</option>
+                                <option value="Tura El-Balad">Tura El-Balad</option>
+                                <option value="Sakanat El-Maadi">Sakanat El-Maadi</option>
+                                <option value="Maadi">Maadi</option>
+                                <option value="Hadayeq El-Maadi">Hadayeq El-Maadi</option>
+                                <option value="Dar El-Salam">Dar El-Salam</option>
+                                <option value="El-Zahraa">El-Zahraa</option>
+                                <option value="Mar Girgis">Mar Girgis</option>
+                                <option value="El-Malek El-Saleh">El-Malek El-Saleh</option>
+                                <option value="Al-Sayeda Zeinab">Al-Sayeda Zeinab</option>
+                                <option value="Saad Zaghloul">Saad Zaghloul</option>
+                                <option value="Sadat">Sadat</option>
+                                <option value="Nasser">Nasser</option>
+                                <option value="Urabi">Urabi</option>
+                                <option value="Al Shohadaa">Al Shohadaa</option>
+                                <option value="Ghamra">Ghamra</option>
+                                <option value="El-Demerdash">El-Demerdash</option>
+                                <option value="Manshiet El-Sadr">Manshiet El-Sadr</option>
+                                <option value="Kobri El-Qobba">Kobri El-Qobba</option>
+                                <option value="Hammamat El-Qobba">Hammamat El-Qobba</option>
+                                <option value="Saray El-Qobba">Saray El-Qobba</option>
+                                <option value="Hadayeq El-Zaitoun">Hadayeq El-Zaitoun</option>
+                                <option value="Helmeyet El-Zaitoun">Helmeyet El-Zaitoun</option>
+                                <option value="El-Matareyya">El-Matareyya</option>
+                                <option value="Ain Shams">Ain Shams</option>
+                                <option value="Ezbet El-Nakhl">Ezbet El-Nakhl</option>
+                                <option value="El-Marg">El-Marg</option>
+                                <option value="New El-Marg">New El-Marg</option>
+                            </select>
+                            <select name="dropoff" class="dropoff2" style="display:none;" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="El Monib">El Monib</option>
+                                <option value="Sakiat Mekky">Sakiat Mekky</option>
+                                <option value="Omm El-Masryeen">Omm El-Masryeen</option>
+                                <option value="Giza">Giza</option>
+                                <option value="Faisal">Faisal</option>
+                                <option value="Cairo University">Cairo University</option>
+                                <option value="Bohooth">Bohooth</option>
+                                <option value="Dokki">Dokki</option>
+                                <option value="Opera">Opera</option>
+                                <option value="Sadat">Sadat</option>
+                                <option value="Mohamed Naguib">Mohamed Naguib</option>
+                                <option value="Ataba">Ataba</option>
+                                <option value="Al Shohadaa">Al Shohadaa</option>
+                                <option value="Masarra">Masarra</option>
+                                <option value="Rod El-Farag">Rod El-Farag</option>
+                                <option value="St. Teresa">St. Teresa</option>
+                                <option value="Khalafawy">Khalafawy</option>
+                                <option value="Mezallat">Mezallat</option>
+                                <option value="Koliet El-Zeraa">Koliet El-Zeraa</option>
+                                <option value="Shubra Al Khaimah">Shubra Al Khaimah</option>
+                            </select>
+                            <select name="dropoff" class="dropoff3" style="display:none;" autocomplete="off">
+                                <option value="">-- Choose station --</option>
+                                <option value="Adly Mansour">Adly Mansour</option>
+                                <option value="Heykestep">Heykestep</option>
+                                <option value="Omar Ibn Al Khattab">Omar Ibn Al Khattab</option>
+                                <option value="Qebaa">Qebaa</option>
+                                <option value="Hesham Barakat">Hesham Barakat</option>
+                                <option value="El Nozha">El Nozha</option>
+                                <option value="Nadi El Shams">Nadi El Shams</option>
+                                <option value="Alf Maskan">Alf Maskan</option>
+                                <option value="Heliopolis">Heliopolis</option>
+                                <option value="Haroun">Haroun</option>
+                                <option value="Al Ahram">Al Ahram</option>
+                                <option value="Koleyet El Banat">Koleyet El Banat</option>
+                                <option value="Cairo Stadium">Cairo Stadium</option>
+                                <option value="Fair Zone">Fair Zone</option>
+                                <option value="Abbassiya">Abbassiya</option>
+                                <option value="Abdou Pasha">Abdou Pasha</option>
+                                <option value="El Geish">El Geish</option>
+                                <option value="Bab El Shaaria">Bab El Shaaria</option>
+                                <option value="Ataba">Ataba</option>
+                                <option value="Nasser">Nasser</option>
+                                <option value="Maspero">Maspero</option>
+                                <option value="Safaa Hegazy">Safaa Hegazy</option>
+                                <option value="Kit Kat">Kit Kat</option>
+                                <option value="Sudan St.">Sudan St.</option>
+                                <option value="Imbaba">Imbaba</option>
+                                <option value="El Bohy">El Bohy</option>
+                                <option value="El-Qawmia">El-Qawmia</option>
+                                <option value="Ring Rd.">Ring Rd.</option>
+                                <option value="Rod El Farag Corridor">Rod El Farag Corridor</option>
+                                <option value="Tawfikia">Tawfikia</option>
+                                <option value="Wadi El Nile">Wadi El Nile</option>
+                                <option value="Gamat El Dowal">Gamat El Dowal</option>
+                                <option value="Boulak El Dakrour">Boulak El Dakrour</option>
+                                <option value="Cairo University">Cairo University</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="calculateTicket()" class="btn btn-primary">Find Route & Price</button>
+                    <button id="startTravelBtn" onclick="startTravelMode()" class="btn btn-primary">Start Traveling</button>
+                    <button onclick="resetForm()" class="btn btn-secondary">Reset</button>
+                </div>
+
+                <div id="resultsContainer" class="results">
+                    <div class="result-item">
+                        <div class="result-item-header">
+                            <span class="result-item-icon">Fare</span>
+                            <h3>Your Journey Summary</h3>
+                        </div>
+                        <div class="result-item-content">
+                            <div class="result-stat">
+                                <div class="result-stat-label">Total Stations</div>
+                                <div class="result-stat-value" id="cstats">0</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-label">Ticket Price</div>
+                                <div class="result-stat-value" id="ticketCost">-</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-label">Elderly / Army / Police</div>
+                                <div class="result-stat-value" id="elderlyCost">-</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-label">Special Needs</div>
+                                <div class="result-stat-value" id="specialNeedsCost">-</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-label">Estimated Trip Time</div>
+                                <div class="result-stat-value" id="estimatedTime">-</div>
+                            </div>
+                        </div>
+                        <div class="route-visualization">
+                            <div class="route-label">Complete Route</div>
+                            <div class="route-stations" id="stationsList"></div>
+                            <div class="route-path" id="stations"></div>
+                            <div class="transfer-guide" id="transferGuide"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-coordinates" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-coordinates" hidden>
+                <section class="coord-tools" id="coordTools">
+                    <h2>Find Closest Station by Coordinates</h2>
+                    <p style="color: #b0c4c1;">Enter your current coordinates and destination coordinates, or use live location.</p>
+                    <div class="coord-link-grid">
+                        <label>
+                            <p>Current Location Link</p>
+                            <input id="currentLocationLink" class="coord-link-input" type="text" placeholder="Paste Google Maps / Apple Maps / Waze / OSM link or lat,lng">
+                        </label>
+                        <label>
+                            <p>Destination Location Link</p>
+                            <input id="destLocationLink" class="coord-link-input" type="text" placeholder="Paste location app link or lat,lng">
+                        </label>
+                    </div>
+                    <div class="coord-grid">
+                        <label>
+                            <p>Current Latitude</p>
+                            <input id="currentLat" type="number" step="any" placeholder="e.g. 30.0444">
+                        </label>
+                        <label>
+                            <p>Current Longitude</p>
+                            <input id="currentLng" type="number" step="any" placeholder="e.g. 31.2357">
+                        </label>
+                        <label>
+                            <p>Destination Latitude</p>
+                            <input id="destLat" type="number" step="any" placeholder="e.g. 30.0100">
+                        </label>
+                        <label>
+                            <p>Destination Longitude</p>
+                            <input id="destLng" type="number" step="any" placeholder="e.g. 31.2000">
+                        </label>
+                    </div>
+                    <div class="coord-actions">
+                        <button type="button" class="btn btn-secondary" onclick="importCoordinatesFromLinks()">Import Coordinates From Links</button>
+                        <button type="button" class="btn btn-secondary" onclick="getLiveLocation()">Use Live Location</button>
+                        <button type="button" class="btn btn-primary" onclick="findClosestStationNow()">Closest Station To Me</button>
+                        <button type="button" class="btn btn-primary" onclick="findClosestStartEndStations()">Find Closest Start &amp; End</button>
+                    </div>
+                    <div id="coordResult" class="coord-result">Closest-station results will appear here.</div>
+                </section>
+            </section>
+
+            <section id="tab-info" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-info" hidden>
+                <section class="fares-section" id="fares" role="region" aria-label="Ticket Fares">
+                    <h2>Metro Fare Table</h2>
+                    <div class="fares-table-wrap">
+                        <table class="fares-table">
+                            <thead>
+                                <tr>
+                                    <th>Distance</th>
+                                    <th>Ticket Price (Lines 1,2,3)</th>
+                                    <th>Elderly (Over 60) / Army / Police</th>
+                                    <th>Special Needs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Up to 9 stations</td>
+                                    <td>8 EGP</td>
+                                    <td>4 EGP</td>
+                                    <td>5 EGP</td>
+                                </tr>
+                                <tr>
+                                    <td>10 to 16 stations</td>
+                                    <td>10 EGP</td>
+                                    <td>5 EGP</td>
+                                    <td>5 EGP</td>
+                                </tr>
+                                <tr>
+                                    <td>17 to 23 stations</td>
+                                    <td>15 EGP</td>
+                                    <td>8 EGP</td>
+                                    <td>5 EGP</td>
+                                </tr>
+                                <tr>
+                                    <td>24 to 39 stations</td>
+                                    <td>20 EGP</td>
+                                    <td>10 EGP</td>
+                                    <td>5 EGP</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="lines-section" id="lineStations" role="region" aria-label="Metro lines and stations">
+                    <h2>Metro Lines and Stations Table</h2>
+                    <div class="lines-table-wrap">
+                        <table class="lines-table">
+                            <thead>
+                                <tr>
+                                    <th>Line</th>
+                                    <th>Route</th>
+                                    <th>Stations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Line 1</td>
+                                    <td>Helwan to New El-Marg</td>
+                                    <td>
+                                        <div class="stations-row" aria-label="Line 1 stations">
+                                            <span class="station-pill">Helwan</span><span class="station-pill">Ain Helwan</span><span class="station-pill">Helwan University</span><span class="station-pill">Wadi Hof</span><span class="station-pill">Hadayeq Helwan</span><span class="station-pill">Elmasraa</span><span class="station-pill">Tura El-Asmant</span><span class="station-pill">Kozzika</span><span class="station-pill">Tura El-Balad</span><span class="station-pill">Sakanat El-Maadi</span><span class="station-pill">Maadi</span><span class="station-pill">Hadayeq El-Maadi</span><span class="station-pill">Dar El-Salam</span><span class="station-pill">El-Zahraa</span><span class="station-pill">Mar Girgis</span><span class="station-pill">El-Malek El-Saleh</span><span class="station-pill">Al-Sayeda Zeinab</span><span class="station-pill">Saad Zaghloul</span><span class="station-pill">Sadat</span><span class="station-pill">Nasser</span><span class="station-pill">Urabi</span><span class="station-pill">Al Shohadaa</span><span class="station-pill">Ghamra</span><span class="station-pill">El-Demerdash</span><span class="station-pill">Manshiet El-Sadr</span><span class="station-pill">Kobri El-Qobba</span><span class="station-pill">Hammamat El-Qobba</span><span class="station-pill">Saray El-Qobba</span><span class="station-pill">Hadayeq El-Zaitoun</span><span class="station-pill">Helmeyet El-Zaitoun</span><span class="station-pill">El-Matareyya</span><span class="station-pill">Ain Shams</span><span class="station-pill">Ezbet El-Nakhl</span><span class="station-pill">El-Marg</span><span class="station-pill">New El-Marg</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Line 2</td>
+                                    <td>El Monib to Shubra Al Khaimah</td>
+                                    <td>
+                                        <div class="stations-row" aria-label="Line 2 stations">
+                                            <span class="station-pill">El Monib</span><span class="station-pill">Sakiat Mekky</span><span class="station-pill">Omm El-Masryeen</span><span class="station-pill">Giza</span><span class="station-pill">Faisal</span><span class="station-pill">Cairo University</span><span class="station-pill">Bohooth</span><span class="station-pill">Dokki</span><span class="station-pill">Opera</span><span class="station-pill">Sadat</span><span class="station-pill">Mohamed Naguib</span><span class="station-pill">Ataba</span><span class="station-pill">Al Shohadaa</span><span class="station-pill">Masarra</span><span class="station-pill">Rod El-Farag</span><span class="station-pill">St. Teresa</span><span class="station-pill">Khalafawy</span><span class="station-pill">Mezallat</span><span class="station-pill">Koliet El-Zeraa</span><span class="station-pill">Shubra Al Khaimah</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Line 3</td>
+                                    <td>Adly Mansour to Rod El Farag Corridor</td>
+                                    <td>
+                                        <div class="stations-row" aria-label="Line 3 stations">
+                                            <span class="station-pill">Adly Mansour</span><span class="station-pill">Heykestep</span><span class="station-pill">Omar Ibn Al Khattab</span><span class="station-pill">Qebaa</span><span class="station-pill">Hesham Barakat</span><span class="station-pill">El Nozha</span><span class="station-pill">Nadi El Shams</span><span class="station-pill">Alf Maskan</span><span class="station-pill">Heliopolis</span><span class="station-pill">Haroun</span><span class="station-pill">Al Ahram</span><span class="station-pill">Koleyet El Banat</span><span class="station-pill">Cairo Stadium</span><span class="station-pill">Fair Zone</span><span class="station-pill">Abbassiya</span><span class="station-pill">Abdou Pasha</span><span class="station-pill">El Geish</span><span class="station-pill">Bab El Shaaria</span><span class="station-pill">Ataba</span><span class="station-pill">Nasser</span><span class="station-pill">Maspero</span><span class="station-pill">Safaa Hegazy</span><span class="station-pill">Kit Kat</span><span class="station-pill">Sudan St.</span><span class="station-pill">Imbaba</span><span class="station-pill">El Bohy</span><span class="station-pill">El-Qawmia</span><span class="station-pill">Ring Rd.</span><span class="station-pill">Rod El Farag Corridor</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+        </div>
+
+        <section class="metro-map" id="metroMap" role="region" aria-label="Interactive Metro Map" style="margin-top: 2rem;">
+            <h2>Cairo Metro Network Map</h2>
+            <div class="travel-hud" role="status" aria-live="polite">
+                <div id="travelStatus" class="travel-status">Travel mode is off.</div>
+                <div id="travelSpeed" class="travel-speed-chip">Speed: -- km/h</div>
+            </div>
+            <div id="stationMap" class="station-map"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Mivex &copy; 2026 | Navigate Cairo's Metro Network with Ease</p>
+    </footer>
+
+    <script src="js/leaflet.js"></script>
+
+    <script src="js/metro-script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function() {
+                    // Service worker registration can fail on some private/incognito sessions.
+                });
+            });
+        }
+    </script>
+</body>
+</html>
