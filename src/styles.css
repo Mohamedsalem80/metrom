@@ -18,6 +18,12 @@ body {
 
 .app-shell {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
 }
 
 .container {
@@ -1015,5 +1021,179 @@ body {
 
   .overview-divider {
     margin-top: 2rem;
+  }
+}
+
+/* Metro Info Accordion Styles */
+.fares-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.5rem 0;
+}
+
+.fares-header h2 {
+  margin: 0;
+}
+
+.fares-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.fares-toggle.open {
+  transform: rotate(-180deg);
+}
+
+/* Metro Lines Accordion */
+.metro-lines-accordion {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.metro-line-item {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 207, 134, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.metro-line-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.metro-line-header:hover {
+  background: rgba(255, 207, 134, 0.06);
+}
+
+.line-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  color: white;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.line-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.line-name {
+  color: #ffcf86;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.line-route {
+  color: #b7d1cb;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.line-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #ffcf86;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.line-toggle.open {
+  transform: rotate(-180deg);
+}
+
+.metro-line-content {
+  padding: 0.75rem 0.85rem 0.85rem;
+  border-top: 1px solid rgba(255, 207, 134, 0.12);
+  background: rgba(5, 25, 22, 0.4);
+}
+
+.station-count {
+  color: #b7d1cb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stations-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.station-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 207, 134, 0.12);
+  color: #d7e9e4;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 207, 134, 0.2);
+  white-space: nowrap;
+}
+
+/* Mobile styles for Metro Info */
+@media (max-width: 1024px) {
+  .fares-table {
+    font-size: 0.85rem;
+  }
+
+  .fares-table th,
+  .fares-table td {
+    padding: 0.6rem;
+  }
+
+  .line-badge {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 0.85rem;
+  }
+
+  .line-name {
+    font-size: 0.95rem;
+  }
+
+  .line-route {
+    font-size: 0.75rem;
+  }
+
+  .stations-grid {
+    gap: 0.4rem;
+  }
+
+  .station-pill {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
   }
 }

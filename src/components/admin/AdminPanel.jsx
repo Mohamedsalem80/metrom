@@ -18,6 +18,8 @@ export default function AdminPanel({ accessToken, onRefreshMetroConfig }) {
   const [lineForm, setLineForm] = useState({ id: '', label: '', routeLabel: '' });
   const [stationForm, setStationForm] = useState({ lineId: '', name: '', sortOrder: 0 });
   const [fareForm, setFareForm] = useState({ distance: '', minStations: 0, maxStations: 0, ticket: '', elderly: '', specialNeeds: '' });
+  const [editingFareId, setEditingFareId] = useState('');
+  const [fareEditForm, setFareEditForm] = useState({ distance: '', minStations: 0, maxStations: 0, ticket: '', elderly: '', specialNeeds: '' });
 
   const refreshData = async () => {
     const result = await getAdminMetroConfig(accessToken);
@@ -106,17 +108,38 @@ export default function AdminPanel({ accessToken, onRefreshMetroConfig }) {
     await notifyResult(result, 'Station updated.');
   };
 
-  const handleQuickEditFare = async (fare) => {
-    const nextDistance = window.prompt('Update distance label:', fare.distance);
-    if (!nextDistance) return;
-    const nextTicket = window.prompt('Update ticket price:', fare.ticket);
-    if (!nextTicket) return;
-
-    const result = await updateFareBand(accessToken, fare.id, {
-      distance: nextDistance,
-      ticket: nextTicket
+  const beginFareEdit = (fare) => {
+    setEditingFareId(fare.id);
+    setFareEditForm({
+      distance: fare.distance,
+      minStations: fare.minStations,
+      maxStations: fare.maxStations,
+      ticket: fare.ticket,
+      elderly: fare.elderly,
+      specialNeeds: fare.specialNeeds
     });
+  };
+
+  const cancelFareEdit = () => {
+    setEditingFareId('');
+    setFareEditForm({ distance: '', minStations: 0, maxStations: 0, ticket: '', elderly: '', specialNeeds: '' });
+  };
+
+  const saveFareEdit = async () => {
+    if (!editingFareId) return;
+
+    const payload = {
+      distance: fareEditForm.distance.trim(),
+      minStations: Number(fareEditForm.minStations),
+      maxStations: Number(fareEditForm.maxStations),
+      ticket: fareEditForm.ticket.trim(),
+      elderly: fareEditForm.elderly.trim(),
+      specialNeeds: fareEditForm.specialNeeds.trim()
+    };
+
+    const result = await updateFareBand(accessToken, editingFareId, payload);
     await notifyResult(result, 'Fare band updated.');
+    if (result.ok) cancelFareEdit();
   };
 
   return (
@@ -249,15 +272,58 @@ export default function AdminPanel({ accessToken, onRefreshMetroConfig }) {
             <div className="saved-trips-list">
               {config.fareBands.map((fare) => (
                 <article key={fare.id} className="saved-trip-item">
-                  <div className="saved-trip-head">
-                    <strong>{fare.distance}</strong>
-                    <span>{fare.ticket}</span>
-                  </div>
-                  <p>{fare.minStations} - {fare.maxStations} stations • Elderly: {fare.elderly} • Special: {fare.specialNeeds}</p>
-                  <div className="profile-actions">
-                    <button type="button" className="btn btn-secondary" onClick={() => handleQuickEditFare(fare)}>Edit</button>
-                    <button type="button" className="btn btn-secondary" onClick={() => deleteFareBand(accessToken, fare.id).then((result) => notifyResult(result, 'Fare band deleted.'))}>Delete</button>
-                  </div>
+                  {editingFareId === fare.id ? (
+                    <>
+                      <form
+                        className="profile-edit-form"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          saveFareEdit();
+                        }}
+                      >
+                        <label>
+                          <span>Distance Label</span>
+                          <input className="auth-input" value={fareEditForm.distance} onChange={(event) => setFareEditForm((prev) => ({ ...prev, distance: event.target.value }))} />
+                        </label>
+                        <label>
+                          <span>Min Stations</span>
+                          <input className="auth-input" type="number" value={fareEditForm.minStations} onChange={(event) => setFareEditForm((prev) => ({ ...prev, minStations: Number(event.target.value) }))} />
+                        </label>
+                        <label>
+                          <span>Max Stations</span>
+                          <input className="auth-input" type="number" value={fareEditForm.maxStations} onChange={(event) => setFareEditForm((prev) => ({ ...prev, maxStations: Number(event.target.value) }))} />
+                        </label>
+                        <label>
+                          <span>Ticket</span>
+                          <input className="auth-input" value={fareEditForm.ticket} onChange={(event) => setFareEditForm((prev) => ({ ...prev, ticket: event.target.value }))} />
+                        </label>
+                        <label>
+                          <span>Elderly</span>
+                          <input className="auth-input" value={fareEditForm.elderly} onChange={(event) => setFareEditForm((prev) => ({ ...prev, elderly: event.target.value }))} />
+                        </label>
+                        <label>
+                          <span>Special Needs</span>
+                          <input className="auth-input" value={fareEditForm.specialNeeds} onChange={(event) => setFareEditForm((prev) => ({ ...prev, specialNeeds: event.target.value }))} />
+                        </label>
+                        <div className="profile-edit-actions">
+                          <button type="submit" className="btn btn-primary">Save</button>
+                          <button type="button" className="btn btn-secondary" onClick={cancelFareEdit}>Cancel</button>
+                        </div>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <div className="saved-trip-head">
+                        <strong>{fare.distance}</strong>
+                        <span>{fare.ticket}</span>
+                      </div>
+                      <p>{fare.minStations} - {fare.maxStations} stations • Elderly: {fare.elderly} • Special: {fare.specialNeeds}</p>
+                      <div className="profile-actions">
+                        <button type="button" className="btn btn-secondary" onClick={() => beginFareEdit(fare)}>Edit</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => deleteFareBand(accessToken, fare.id).then((result) => notifyResult(result, 'Fare band deleted.'))}>Delete</button>
+                      </div>
+                    </>
+                  )}
                 </article>
               ))}
             </div>
